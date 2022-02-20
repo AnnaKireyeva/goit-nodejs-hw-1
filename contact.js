@@ -4,18 +4,14 @@ const { v4 } = require("uuid");
 
 const contactsPath = path.join(__dirname, "./db/contacts.json");
 
-const readContent = async () => {
-  const content = await fs.readFile(contactsPath, "utf-8");
-  const resultContent = JSON.parse(content);
-  return resultContent;
-};
-
 async function listContacts() {
-  return await readContent();
+  const content = await fs.readFile(contactsPath);
+  const contacts = JSON.parse(content);
+  return contacts;
 }
 
 async function getContactById(contactId) {
-  const contacts = await readContent();
+  const contacts = await listContacts();
   const result = contacts.find((item) => item.id === contactId);
   if (!result) {
     return null;
@@ -28,7 +24,7 @@ async function removeContact(contactId) {
     console.log("Please enter id");
     return "";
   }
-  const contacts = await readContent();
+  const contacts = await listContacts();
   const index = contacts.findIndex((item) => item.id === contactId);
   if (index === -1) {
     console.log(`Contact with id=${contactId} is not found`);
@@ -40,11 +36,22 @@ async function removeContact(contactId) {
 }
 
 async function addContact(name, email, phone) {
-  const contacts = await readContent();
+  const contacts = await listContacts();
   const newContact = { id: v4(), name, email, phone };
   contacts.push(newContact);
   await fs.writeFile(contactsPath, JSON.stringify(contacts));
   return newContact;
+}
+
+async function updateContactById(id, name, email, phone) {
+  const contacts = await listContacts();
+  const index = contacts.findIndex((item) => item.id === id);
+  if (index === -1) {
+    return null;
+  }
+  contacts[index] = { id, name, email, phone };
+  await fs.writeFile(contactsPath, JSON.stringify(contacts));
+  return contacts[index];
 }
 
 module.exports = {
@@ -52,4 +59,5 @@ module.exports = {
   getContactById,
   removeContact,
   addContact,
+  updateContactById,
 };

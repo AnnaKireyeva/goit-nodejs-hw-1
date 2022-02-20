@@ -4,6 +4,7 @@ const {
   addContact,
   getContactById,
   removeContact,
+  updateContactById,
 } = require("./contact");
 const program = new Command();
 program
@@ -40,6 +41,13 @@ async function invokeAction({ action, id, name, email, phone }) {
     case "remove":
       const removedContacts = await removeContact(id);
       console.table(removedContacts);
+      break;
+    case "update":
+      const updatedContact = await updateContactById(id, name, email, phone);
+      if (!updatedContact) {
+        throw new Error(`Contact with id=${id} not found`);
+      }
+      console.log(updatedContact);
       break;
 
     default:
